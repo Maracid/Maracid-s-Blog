@@ -1,0 +1,15 @@
+/public/
+/resources/
+.hugo_build.lock
+
+/node_modules/
+**/node_modules/
+
+.wrangler/
+
+/.jj/
+
+.backup-*/
+*.bak
+
+*.log

@@ -1,0 +1,21 @@
+#+TITLE: HomePage
+#+DATE: 2026-10-09
+
+* About Me
+
+** Profile
+| Nickname | Maracid |
+|---+---|
+| What want to learn | Math C HPC |
+| Language | Chinese English |
+| Email | Maracid@proton.me |
+
+You can call me Jules!
+Thank for your view
+
+** Friend's Link
+#+begin_export html
+<div class="buttons">
+{{< button href="https://blog.lonnet.uk/" txt="Lonnet" >}}
+</div>
+#+end_export

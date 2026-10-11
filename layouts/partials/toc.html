@@ -1,0 +1,12 @@
+{{ $toc := .TableOfContents }}
+
+{{ with $.Page.Params.toc }}
+{{ if $toc }}
+<aside class="toc">
+  <p class="toc-title">{{ i18n "toc" . }}</p>
+  <div class="content">
+    {{ $toc }}
+  </div>
+</aside>
+{{ end }}
+{{ end }}

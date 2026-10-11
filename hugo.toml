@@ -1,0 +1,55 @@
+baseURL = 'https://example.org/'
+locale = 'en-us'
+title = "Maracid's Blog"
+theme = "hugo-theme-iris"
+
+enableRobotsTXT = true
+
+[security]
+  allowContent = ['^text/markdown$', '^text/org$']
+
+[menus]
+  [[menus.main]]
+    identifier = "posts"
+    name = "Posts"
+    url = "/posts/"
+    weight = 1
+
+[module]
+  [[module.mounts]]
+    source = "assets"
+    target = "assets"
+
+  [[module.mounts]]
+    source = "static"
+    target = "static"
+
+  [[module.mounts]]
+    source = "node_modules/reveal.js"
+    target = "assets/reveal.js"
+
+  [[module.mounts]]
+    source = "node_modules/hotkeys-js"
+    target = "assets/hotkeys-js"
+
+  [[module.mounts]]
+    source = "node_modules/mermaid"
+    target = "assets/mermaid"
+
+  [[module.mounts]]
+    source = "node_modules/mathjax"
+    target = "assets/mathjax"
+
+  [[module.mounts]]
+    source = "node_modules/mathjax/es5/output/chtml/fonts/woff-v2"
+    target = "static/mathjax/es5/output/chtml/fonts/woff-v2"
+
+[params]
+  title = "Maracid's Blog"
+  description = 'A Place Write Something'
+  themeColor = '#363636'
+
+  [params.icon]
+    favicon = '/favicon/favicon64.ico'
+    x180    = '/favicon/apple-icon-180x180.png'
+    mstile  = '/favicon/ms-icon-150x150.png'

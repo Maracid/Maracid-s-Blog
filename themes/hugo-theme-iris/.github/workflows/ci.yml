@@ -1,0 +1,201 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "README.md"
+  pull_request:
+    paths-ignore:
+      - "README.md"
+  schedule:
+    - cron: "13 13 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  HUGO_CACHEDIR: /home/runner/.cache/hugo
+
+jobs:
+  renovate:
+    runs-on: ubuntu-slim
+    timeout-minutes: 3
+    permissions: {}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: peaceiris/workflows/setup-node@99f66a30a38f806fd0df9014275c7cef0b6d9ca5 # v0.21.6
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run test:renovate
+
+  envs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions: {}
+    outputs:
+      HUGO_VERSION: ${{ steps.envs.outputs.HUGO_VERSION }}
+      NODE_VERSION: ${{ steps.envs.outputs.NODE_VERSION }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Set envs
+        id: envs
+        run: |
+          echo "HUGO_VERSION=$(make get-hugo-version)" | tee -a "${GITHUB_OUTPUT}"
+          echo "NODE_VERSION=$(cat .nvmrc)" | tee -a "${GITHUB_OUTPUT}"
+
+  deploy:
+    needs: envs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    permissions:
+      contents: write
+      deployments: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+
+      - uses: peaceiris/workflows/setup-hugo@99f66a30a38f806fd0df9014275c7cef0b6d9ca5 # v0.21.6
+        with:
+          node-version: "${{ needs.envs.outputs.NODE_VERSION }}"
+          hugo-version: "${{ needs.envs.outputs.HUGO_VERSION }}"
+          extended: true
+
+      - run: make npm-ci
+
+      - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v1
+        with:
+          deno-version: "v1.x"
+
+      - run: make fetch-data
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+      - run: make build-staging
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@4cbaf4c08f1a7bfa537d6113472ef4424e4eb654 # v3.0.0
+        with:
+          publish-dir: "./exampleSite/public"
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions"
+          enable-pull-request-comment: true
+          enable-commit-comment: false
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 1
+
+      - run: make build-prod
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          #deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./exampleSite/public
+          allow_empty_commit: true
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+
+  lighthouse:
+    needs: deploy
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Install lighthouse
+        run: sudo npm i -g lighthouse@11.7.1
+
+      - name: Run lighthouse
+        run: |
+          lighthouse \
+            --chrome-flags="--headless" \
+            --output html --output-path ./report.html \
+            'https://hugothemeiris.peaceiris.com'
+
+      - name: Upload result
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: lighthouse-report
+          path: report.html
+
+      - name: Prepare assets
+        run: |
+          mkdir ./public
+          cp ./report.html ./public/report.html
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
+        with:
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          publish_dir: ./public
+          keep_files: true
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+
+  docker:
+    needs: envs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - uses: peaceiris/workflows/setup-node@99f66a30a38f806fd0df9014275c7cef0b6d9ca5 # v0.21.6
+        with:
+          node-version: "${{ needs.envs.outputs.NODE_VERSION }}"
+          cache: "npm"
+
+      - name: prepare
+        run: |
+          sed -i 's/enableGitInfo: true/# enableGitInfo: true/' exampleSite/config/_default/config.yaml
+
+      - run: make docker-build
+
+  setup:
+    needs: envs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    if: ${{ github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - uses: peaceiris/workflows/setup-hugo@99f66a30a38f806fd0df9014275c7cef0b6d9ca5 # v0.21.6
+        with:
+          node-version: "${{ needs.envs.outputs.NODE_VERSION }}"
+          hugo-version: "${{ needs.envs.outputs.HUGO_VERSION }}"
+          extended: true
+
+      - uses: peaceiris/workflows/setup-git@99f66a30a38f806fd0df9014275c7cef0b6d9ca5 # v0.21.6
+        with:
+          flags: "--global"
+
+      - name: Create a new Hugo project
+        run: |
+          mkdir ~/homepage
+          cp scripts/setup.sh ~
+          cd ~
+          bash ./setup.sh "homepage" "peaceiris" "${GITHUB_SHA}"
+          cd homepage
+          npm ci
+          hugo

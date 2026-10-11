@@ -1,0 +1,17 @@
+#+TITLE: That is a test
+#+DESCRIPTION: This is a simple test again
+#+AUTHOR: Maracid
+#+DATE: 2026-10-09
+#+EYECATCH: images/Background/snowday.jpg
+#+DRAFT: true
+#+MATH: true
+
+* The Head Title
+Let do something
+
+** Math test
+
+{{< math >}}
+\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
+{{< /math >}}
+

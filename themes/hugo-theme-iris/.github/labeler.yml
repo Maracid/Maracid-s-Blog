@@ -1,0 +1,20 @@
+cicd:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/*"
+          - "renovate.json"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".nvmrc"
+          - "package.json"
+          - "package-lock.json"
+          - "go.mod"
+          - "go.sum"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "README.md"
+          - "CONTRIBUTING.md"
