@@ -1,0 +1,11 @@
+{{ define "main" }}
+  <section class="section has-text-centered">
+    <h1 class="title is-1">404</h1>
+    <p class="subtitle is-4">Nothing here</p>
+    <p>So, What Wrong?</p>
+    <div class="buttons is-centered" style="margin-top: 1.5rem;">
+      <a class="button is-link normal-link" href="{{ "/" | relLangURL }}">Return to HomePage</a>
+      <a class="button is-light normal-link" href="{{ "/posts/" | relLangURL }}">Posts</a>
+    </div>
+  </section>
+{{ end }}
