@@ -17,5 +17,6 @@ Thank for your view
 #+begin_export html
 <div class="buttons">
 {{< button href="https://blog.lonnet.uk/" txt="Lonnet" >}}
+{{< button href="https://qiumix.github.io/" txt="Qiumix" >}}
 </div>
 #+end_export

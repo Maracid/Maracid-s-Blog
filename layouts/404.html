@@ -1,11 +1,43 @@
 {{ define "main" }}
   <section class="section has-text-centered">
-    <h1 class="title is-1">404</h1>
-    <p class="subtitle is-4">Nothing here</p>
-    <p>So, What Wrong?</p>
+    <p class="subtitle is-4" id="joke-404-line">
+      This page is not in the domain, not in the codomain, and not in your history either.
+    </p>
+    <p class="has-text-grey" id="joke-404-detail">
+      We checked ℕ, ℝ, ℂ and the empty set. Nothing.
+    </p>
+
     <div class="buttons is-centered" style="margin-top: 1.5rem;">
-      <a class="button is-link normal-link" href="{{ "/" | relLangURL }}">Return to HomePage</a>
-      <a class="button is-light normal-link" href="{{ "/posts/" | relLangURL }}">Posts</a>
+      <a class="button is-link normal-link" href="{{ "/" | relLangURL }}">Take me home</a>
+      <a class="button is-light normal-link" href="{{ "/posts/" | relLangURL }}">Show me the posts</a>
     </div>
+
+    <p class="is-size-7 has-text-grey-light">
+      Pro tip: press <kbd>g</kbd> then <kbd>h</kbd> — the keyboard still works even when the URL doesn't.
+    </p>
   </section>
+
+  <script>
+    const jokes404 = [
+      ["This page is not in the domain, not in the codomain, and not in your history either.",
+       "We checked ℕ, ℝ, ℂ and the empty set. Nothing."],
+      ["$ find / -name 'this-page' 2>/dev/null",
+       "Returned nothing. Even the kernel gave up."],
+      ["The page you requested has been garbage collected.",
+       "No references remain. It lived a good life."],
+      ["This URL diverges.",
+       "No limit exists. A mathematician has been notified."],
+      ["404 — the page exists in a superposition.",
+       "You collapsed it the wrong way. Try again."],
+      ["Your request was distributed across 1024 ranks.",
+       "All 1024 returned NULL. A collective failure, literally."],
+      ["You have reached a page made entirely of void.",
+       "Which, in fairness, describes most of the internet."],
+      ["The page ran away at 3 a.m.",
+       "We asked it to come back. It said no."]
+    ];
+    const joke = jokes404[Math.floor(Math.random() * jokes404.length)];
+    document.getElementById("joke-404-line").textContent = joke[0];
+    document.getElementById("joke-404-detail").textContent = joke[1];
+  </script>
 {{ end }}
