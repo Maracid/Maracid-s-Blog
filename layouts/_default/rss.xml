@@ -1,0 +1,45 @@
+{{- $fullText := true -}}
+{{- $pages := .RegularPages -}}
+{{- if .IsHome -}}{{- $pages = .Site.RegularPages -}}{{- end -}}
+{{- $pages = $pages.ByDate.Reverse -}}
+{{- $limit := .Site.Config.Services.RSS.Limit -}}
+{{- if ge $limit 1 -}}{{- $pages = first $limit $pages -}}{{- end -}}
+{{- $self := printf "%sindex.xml" .Permalink -}}
+{{ printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<rss version="2.0"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} · {{ .Site.Title }}{{ end }}</title>
+    <link>{{ .Permalink }}</link>
+    <description>{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}</description>
+    <generator>Hugo {{ hugo.Version }}</generator>
+    {{ with .Site.Language.Locale }}<language>{{ . }}</language>{{ end }}
+    {{ with .Site.Params.author }}<dc:creator>{{ . }}</dc:creator>{{ end }}
+    <lastBuildDate>{{ now.Format "Mon, 02 Jan 2006 15:04:05 -0700" }}</lastBuildDate>
+    <atom:link href="{{ $self }}" rel="self" type="application/rss+xml" />
+    {{- $img := .Site.Params.rssImage | default .Site.Params.icon.x180 -}}
+    {{- with $img }}
+    <image>
+      <url>{{ . | absURL }}</url>
+      <title>{{ $.Site.Title }}</title>
+      <link>{{ $.Site.BaseURL }}</link>
+    </image>
+    {{- end }}
+    {{- range $pages }}
+    <item>
+      <title>{{ .Title }}</title>
+      <link>{{ .Permalink }}</link>
+      <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" }}</pubDate>
+      <guid isPermaLink="true">{{ .Permalink }}</guid>
+      {{- with .Params.author }}<dc:creator>{{ . }}</dc:creator>{{ end }}
+      {{- range .Params.tags }}<category>{{ . }}</category>{{ end }}
+      <description>{{ with .Description }}{{ . }}{{ else }}{{ .Summary | plainify | htmlUnescape | strings.TrimSpace | truncate 200 }}{{ end }}</description>
+      {{- if $fullText }}
+      <content:encoded>{{ .Content | transform.XMLEscape | safeHTML }}</content:encoded>
+      {{- end }}
+    </item>
+    {{- end }}
+  </channel>
+</rss>
