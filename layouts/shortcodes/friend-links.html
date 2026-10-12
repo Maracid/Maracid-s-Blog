@@ -1,0 +1,20 @@
+{{ with hugo.Data.friends }}
+<div class="friend-links">
+  {{ range . }}
+  {{ $name := .name }}
+  {{ $url := .url }}
+  <a class="friend-links__item" href="{{ $url }}">
+    {{ with .avatar }}
+    <img class="friend-links__avatar" src="{{ . }}" alt="{{ $name }}" loading="lazy">
+    {{ else }}
+    <span class="friend-links__avatar" aria-hidden="true">{{ index (split $name "") 0 }}</span>
+    {{ end }}
+    <span class="friend-links__text">
+      <span class="friend-links__name">{{ $name }}</span>
+      {{ with .desc }}<span class="friend-links__desc">{{ . }}</span>{{ end }}
+      <span class="friend-links__url">{{ $url | replaceRE `^https?://` "" | strings.TrimSuffix "/" }}</span>
+    </span>
+  </a>
+  {{ end }}
+</div>
+{{ end }}

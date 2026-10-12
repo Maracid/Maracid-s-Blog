@@ -3,7 +3,7 @@
 {{ with $.Page.Params.toc }}
 {{ if $toc }}
 <aside class="toc">
-  <p class="toc-title">{{ i18n "toc" . }}</p>
+  <h2 class="toc-title">{{ i18n "toc" . }}</h2>
   <div class="content">
     {{ $toc }}
   </div>

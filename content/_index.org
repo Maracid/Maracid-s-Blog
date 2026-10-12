@@ -15,8 +15,5 @@ Thank for your view
 
 ** Friend's Link
 #+begin_export html
-<div class="buttons">
-{{< button href="https://blog.lonnet.uk/" txt="Lonnet" >}}
-{{< button href="https://qiumix.github.io/" txt="Qiumix" >}}
-</div>
+{{< friend-links >}}
 #+end_export

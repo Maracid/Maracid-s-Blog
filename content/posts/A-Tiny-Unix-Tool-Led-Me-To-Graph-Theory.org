@@ -1,10 +1,12 @@
 #+TITLE: A Tiny Unix Tool Led Me To Graph Theory
 #+AUTHOR: Maracid
 #+DATE: 2026-10-10
+#+DESCRIPTION: Fun of Graph Theory
 #+EYECATCH: images/Background/Night.jpg
 #+TOC: true
 
 * How I Discovered This tool
+#+attr_html: :class lead
 As a Linux user, I'm used to using various tiny tools to solve some problems
 A day, When I meant to type /cr/, my abbreviation for clear, but I typed /gc/ instead. Nothing happened, so I decided to find out what about this tiny tool to satisfy my curious and asked an LLM how to use it.
 
